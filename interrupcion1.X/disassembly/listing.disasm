@@ -1,0 +1,116 @@
+Disassembly Listing for interrupcion1
+Generated From:
+C:/Users/ferma/MPLABXProjects/interrupcion1.X/dist/default/debug/interrupcion1.X.debug.elf
+14/10/2020 08:17:15 PM
+
+---  C:/Users/ferma/MPLABXProjects/interrupcion1.X/intcon.s  --------------------------------------------
+                                                  1:     PROCESSOR 16F887
+                                                  2:     #include <xc.inc>
+                                                  3:     config FOSC = INTRC_CLKOUT// Oscillator Selection bits (INTOSC oscillator: CLKOUT function on RA6/OSC2/CLKOUT pin, I/O function on RA7/OSC1/CLKIN)
+                                                  4:      config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled and can be enabled by SWDTEN bit of the WDTCON register)
+                                                  5:      config PWRTE = OFF       // Power-up Timer Enable bit (PWRT enabled)
+                                                  6:      config MCLRE = ON       // RE3/MCLR pin function select bit (RE3/MCLR pin function is MCLR)
+                                                  7:      config CP = OFF         // Code Protection bit (Program memory code protection is disabled)
+                                                  8:      config CPD = OFF        // Data Code Protection bit (Data memory code protection is disabled)
+                                                  9:      config BOREN = ON       // Brown Out Reset Selection bits (BOR enabled)
+                                                  10:     config IESO = ON        // Internal External Switchover bit (Internal/External Switchover mode is enabled)
+                                                  11:     config FCMEN = ON       // Fail-Safe Clock Monitor Enabled bit (Fail-Safe Clock Monitor is enabled)
+                                                  12:     config LVP = OFF        // Low Voltage Programming Enable bit (RB3 pin has digital I/O, HV on MCLR must be used for programming)
+                                                  13:     config DEBUG=ON
+                                                  14:    // CONFIG2
+                                                  15:     config BOR4V = BOR40V   // Brown-out Reset Selection bit (Brown-out Reset set to 4.0V)
+                                                  16:     config WRT = OFF        // Flash Program Memory Self Write Enable bits (Write protection off)
+                                                  17:     
+                                                  18:    PSECT udata
+                                                  19:    tick:
+                                                  20:        DS 1
+                                                  21:    counter:
+                                                  22:        DS 1
+                                                  23:    counter2:
+                                                  24:        DS 1
+                                                  25:    operador:
+                                                  26:        DS 1
+                                                  27:        
+                                                  28:        
+                                                  29:        
+                                                  30:        PSECT code
+                                                  31:    delay:
+0047  30FF     MOVLW 0xFF                         32:    movlw 0xFF
+0048  00A1     MOVWF 0x21                         33:    movwf counter
+                                                  34:    counter_loop:
+0049  30FF     MOVLW 0xFF                         35:    movlw 0xFF
+004A  00A0     MOVWF 0x20                         36:    movwf tick
+                                                  37:    tick_loop:
+004B  0BA0     DECFSZ 0x20, F                     38:    decfsz tick,f
+004C  284B     GOTO 0x4B                          39:    goto tick_loop
+004D  0BA1     DECFSZ 0x21, F                     40:    decfsz counter,f
+004E  2849     GOTO 0x49                          41:    goto counter_loop
+004F  0008     RETURN                             42:    return
+                                                  43:        
+                                                  44:        
+                                                  45:    PSECT resetVec,class=CODE,delta=2
+                                                  46:    resetVec:
+0000  2820     GOTO 0x20                          47:    goto main
+                                                  48:        
+                                                  49:    PSECT isr,class=CODE,delta=2
+                                                  50:    isr:
+                                                  51:    ;movlw STATUS
+                                                  52:    ;movwf operador
+0004  1C8B     BTFSS INTCON, 0x1                  53:    BTFSS INTCON,1
+0005  280F     GOTO 0xF                           54:    goto salir  
+0006  1C08     BTFSS PORTD, 0x0                   55:    BTFSS PORTD,0
+0007  280C     GOTO 0xC                           56:    goto encender
+0008  2809     GOTO 0x9                           57:    goto apagar
+                                                  58:    apagar:
+0009  1008     BCF PORTD, 0x0                     59:    BCF PORTD,0
+000A  108B     BCF INTCON, 0x1                    60:    bcf INTCON,1
+                                                  61:    ;movlw operador
+                                                  62:    ;movwf STATUS
+000B  0009     RETFIE                             63:    retfie
+                                                  64:    encender:
+000C  1408     BSF PORTD, 0x0                     65:    BSF PORTD,0
+000D  108B     BCF INTCON, 0x1                    66:    bcf INTCON,1
+                                                  67:    ;movlw operador
+                                                  68:    ;movwf STATUS
+000E  0009     RETFIE                             69:    retfie
+                                                  70:    salir:
+                                                  71:    ;movlw operador
+                                                  72:    ;movwf STATUS
+000F  0009     RETFIE                             73:    retfie 
+                                                  74:        
+                                                  75:    PSECT main,class=CODE,delta=2
+                                                  76:    main:
+0020  1303     BCF STATUS, 0x6                    77:    BANKSEL INTCON
+0022  30D0     MOVLW 0xD0                         78:    MOVLW 0b11010000
+0023  008B     MOVWF INTCON                       79:    MOVWF INTCON
+0024  1303     BCF STATUS, 0x6                    80:    BANKSEL OSCCON
+0026  3070     MOVLW 0x70                         81:    MOVLW 0B01110000
+0027  008F     MOVWF OSCCON                       82:    MOVWF OSCCON
+0028  1703     BSF STATUS, 0x6                    83:    BANKSEL ANSELH
+002A  3000     MOVLW 0x0                          84:    movlw 0b00000000
+002B  0089     MOVWF ANSELH                       85:    movwf ANSELH
+002C  1303     BCF STATUS, 0x6                    86:    BANKSEL TRISB
+002E  30FF     MOVLW 0xFF                         87:    movlw 0B11111111
+002F  0086     MOVWF TRISB                        88:    movwf TRISB    
+0030  1303     BCF STATUS, 0x6                    89:    BANKSEL TRISD
+0032  0188     CLRF TRISD                         90:    clrf TRISD
+0033  1303     BCF STATUS, 0x6                    91:    BANKSEL PORTB
+0035  0186     CLRF TRISB                         92:    CLRF PORTB
+0036  1303     BCF STATUS, 0x6                    93:    BANKSEL PORTD
+0038  3000     MOVLW 0x0                          94:    movlw 0b00000000
+0039  0088     MOVWF TRISD                        95:    movwf PORTD
+003A  1303     BCF STATUS, 0x6                    96:    BANKSEL OPTION_REG
+003C  3040     MOVLW 0x40                         97:    movlw 0b01000000
+003D  0081     MOVWF OPTION_REG                   98:    movwf OPTION_REG
+003E  1303     BCF STATUS, 0x6                    99:    BANKSEL WPUB
+0040  30FF     MOVLW 0xFF                         100:   movlw 0b11111111
+0041  0095     MOVWF WPUB                         101:   movwf WPUB
+                                                  102:   INICIO:
+0042  1188     BCF TRISD, 0x3                     103:   BCF PORTD,3
+0043  2047     CALL 0x47                          104:   call delay
+0044  1588     BSF TRISD, 0x3                     105:   BSF PORTD,3
+0045  2047     CALL 0x47                          106:   call delay
+0046  2842     GOTO 0x42                          107:   goto INICIO    
+                                                  108:   END resetVec
+                                                  109:   
+                                                  110:   

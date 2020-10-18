@@ -1,0 +1,154 @@
+PROCESSOR 16F887
+    #include <xc.inc>
+   
+    CONFIG FOSC=INTRC_NOCLKOUT
+    CONFIG WDTE=OFF
+    CONFIG PWRTE=ON
+    CONFIG MCLRE=ON
+    CONFIG CP=OFF
+    CONFIG CPD=OFF
+    CONFIG BOREN=OFF
+    CONFIG IESO=OFF
+    CONFIG FCMEN=OFF
+    CONFIG LVP=OFF
+    CONFIG DEBUG=ON
+     
+    CONFIG BOR4V=BOR40V
+    CONFIG WRT=OFF
+    
+ 
+PSECT udata
+tick:
+    DS 1
+counter:
+    DS 1
+counter2:
+    DS 1
+p1:
+    DS 1
+p2:
+    DS 1
+        
+PSECT code
+delay:
+movlw 0xff
+movwf counter
+counter_loop:
+movlw 0xff
+movwf tick
+tick_loop:
+decfsz tick,f
+goto tick_loop
+decfsz counter,f
+goto counter_loop
+return
+
+PSECT code
+delay2:
+movlw 0x05
+movwf p1
+call delay
+decfsz  p1
+goto $-2
+return
+
+PSECT code
+delay3:
+movlw 0xff
+movwf counter
+counter_loop2:
+movlw 0xff
+movwf tick
+tick_loop2:
+decfsz tick,f
+goto tick_loop2
+decfsz counter,f
+goto counter_loop2
+return
+    
+PSECT resetVec,class=CODE,delta=2
+resetVec:
+goto main
+    
+PSECT isr,class=CODE,delta=2
+isr:
+BANKSEL PORTD
+btfss INTCON,0
+retfie
+clrf PORTD 
+control:
+btfss PORTB,1
+goto comparar
+goto bajo
+comparar:
+btfss PORTB,7
+retfie
+goto alto
+bajo:
+bcf INTCON,0
+bcf PORTD,0
+bcf PORTB,1
+retfie
+alto:
+bcf INTCON,0
+bsf PORTD,0
+bcf PORTB,7
+retfie
+    
+PSECT main,class=CODE,delta=2
+main:
+BANKSEL OPTION_REG
+movlw 0b11000000
+movwf OPTION_REG
+BANKSEL WPUB
+movlw 0b10000010
+movwf WPUB
+clrf INTCON
+movlw 0b11001000
+movwf INTCON
+BANKSEL IOCB
+movlw 0b10000010
+movwf IOCB
+BANKSEL OSCCON
+movlw 0b01110000
+Movwf OSCCON
+BANKSEL ANSELH
+movlw 0b00000000
+movwf ANSELH
+BANKSEL ANSEL
+movlw 0b00000000
+movwf ANSEL
+BANKSEL TRISB
+movlw 0b10000010
+movwf TRISB    
+clrf TRISD
+movlw 0b00000000
+movwf TRISA 
+BANKSEL PORTB
+clrf PORTB
+movlw 0b00000000
+movwf PORTD
+BANKSEL PORTA
+movlw 0b00000000
+movwf PORTA
+loop:
+BANKSEL PORTA
+    call delay
+    call delay
+    call delay
+    call delay
+    movlw 0x01
+    xorwf PORTA,f
+    goto loop
+END 
+    
+
+     
+    
+    
+    
+
+
+
+
+
